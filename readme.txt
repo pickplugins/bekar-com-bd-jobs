@@ -1,34 +1,27 @@
-=== Job Board Manager - Stats ===
+=== bekar com bd Jobs ===
 	Contributors: pickplugins
-	Donate link: http://paratheme.com
-	Tags:  Job Stats, jobs Stats, Job bookmark, Job, Job Poster, job manager, job, job list, job listing, Job Listings, job lists, job management, job manager,
+	Donate link: http://pickplugins.com
+	Tags:  job display from bekar.com.bd
 	Requires at least: 4.1
-	Tested up to: 4.2.4
+	Tested up to: 5.3
 	Stable tag: 1.0.0
 	License: GPLv2 or later
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-	Display job stats for total application and bookmarked on single job page sidebar.
+	Display bangladeshi local job on your site.
 
 == Description ==
 
-Allow website user to save job link as bookmark to their account for future use. after activating this plugin you will see a job save button to each job single page, only logged-in visitors can save jobs link to their account and can see list of saved jobs link to page via short-code.
+This plugin allows you to display latest jobs via widget on sidebar and display job list with search form via shortcodes.
 
+### bekar com bd Jobs by http://pickplugins.com
 
-### Job Board Manager - Stats by http://pickplugins.com
-* [Live Demo &raquo;](http://www.pickplugins.com/demo/job-board-manager/saved-job/)
-* [Get Job Board Manager &raquo;](https://wordpress.org/plugins/job-board-manager/)
-
-<strong>List of Saved Job</strong>
-you can display list of saved jobs with pagination support for user via short-code to any page `[saved_job_list]`
-
-Logged-in user can delete job link.
 
 
 == Installation ==
 
 1. Install as regular WordPress plugin.<br />
-2. Go your plugin setting via WordPress Dashboard and find "<strong>Job Board Manager</strong>" activate it.<br />
+2. Go your plugin setting via WordPress Dashboard and find "<strong>bekar com bd Jobs</strong>" activate it.<br />
 
 
 
@@ -46,4 +39,4 @@ Logged-in user can delete job link.
 
 
 	= 1.0.0 =
-    * 11/08/2015 Initial release.
+    * 08/12/2019 Initial release.

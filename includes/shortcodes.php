@@ -60,14 +60,12 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
     $bekar_keyword = '';
     $bekar_location = '';
 
-    if(isset($_GET['bekarcombd_search']) && $_GET['bekarcombd_search'] == 'Y'){
+    if(! isset( $_POST['bekarcombd_nonce'] ) || ! wp_verify_nonce( $_POST['bekarcombd_nonce'], 'bekarcombd_nonce' ) ){
 
         $bekar_keyword = isset($_GET['bekar_keyword']) ? sanitize_text_field($_GET['bekar_keyword']) : '';
         $bekar_location = isset($_GET['bekar_location']) ? sanitize_text_field($_GET['bekar_location']) : '';
 
-
-
-        $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10&keywords='.$bekar_keyword;
+        $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10&keywords='.urlencode($bekar_keyword);
     }else{
         $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10';
     }
@@ -85,15 +83,17 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
     <div class="bekarcombd-jobs">
 
         <form method="get" action="">
-            <input type="hidden" name="bekarcombd_search" value="Y">
-
             <input placeholder="Keyword" type="search" value="<?php echo $bekar_keyword; ?>" name="bekar_keyword">
             <input placeholder="Location" type="search" value="<?php echo $bekar_location; ?>" name="bekar_location">
+
+            <?php wp_nonce_field( 'bekarcombd_nonce','bekarcombd_nonce' ); ?>
             <input type="submit" value="Submit">
         </form>
 
         <ul class="job-list">
             <?php
+
+            if(!empty($jobs))
             foreach ($jobs as $job){
                 $title = $job->title;
                 $url = $job->url;
