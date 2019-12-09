@@ -6,4 +6,8 @@
 [bekarcombd_jobs_search]
 ```
 
-https://imgur.com/2JIco4Z
+![bekar.com.bd job search](https://i.imgur.com/2JIco4Z.png)
+
+অথবা একটি ইউজেট আছে আপনি সাইডবারে লেটেস্ট জব গুলো দেখাতে পারেন
+
+![bekar.com.bd widget](https://i.imgur.com/Nwmea1m.png)
