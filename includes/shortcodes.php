@@ -21,21 +21,26 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
         $bekar_keyword = isset($_GET['bekar_keyword']) ? sanitize_text_field($_GET['bekar_keyword']) : '';
         $bekar_location = isset($_GET['bekar_location']) ? sanitize_text_field($_GET['bekar_location']) : '';
 
-        $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10&keywords='.urlencode($bekar_keyword);
+        $api_url = 'https://bekar.com.bd/job-search-api/?per_page=5&keywords='.urlencode($bekar_keyword);
 
     }else{
         $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10';
     }
 
+    if ( get_query_var('paged') ) {$paged = get_query_var('paged');}
+    elseif ( get_query_var('page') ) {$paged = get_query_var('page');}
+    else {$paged = 1;}
 
-
+    $per_page = isset($_GET['per_page']) ? sanitize_text_field($_GET['per_page']) : 5;
 
     $response = wp_remote_get( $api_url );
     $body = wp_remote_retrieve_body( $response );
     $response_data =  json_decode($body);
 
     $jobs = $response_data->jobs;
+    $found_posts = $response_data->found_posts;
 
+    echo '<pre>'.var_export($found_posts, true).'</pre>';
     ?>
 
     <div class="bekarcombd-jobs">
@@ -61,7 +66,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
                 $publish_date = strtotime($publish_date);
 
-                //echo '<pre>'.var_export($job, true).'</pre>';
+                //echo '<pre>'.var_export($response_data, true).'</pre>';
 
 
                 ?>
@@ -83,6 +88,16 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
                 </li>
                 <?php
             }
+
+            $big = $found_posts; // need an unlikely integer
+            echo paginate_links( array(
+                'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+                'format' => '?paged=%#%',
+                'current' => max( 1, $paged ),
+                'total' => $per_page
+            ) );
+
+
             ?>
         </ul>
     </div>
