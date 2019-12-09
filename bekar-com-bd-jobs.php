@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: bekar com bd Jobs
-Plugin URI: http://pickplugins.com
+Plugin URI: https://bekar.com.bd/
 Description: Display jobs from bekar.com.bd for bangladeshi local job news.
 Version: 1.0.0
 Author: pickplugins
@@ -36,7 +36,7 @@ class bekarcombdJobs{
 
 
     function load_widget(){
-        register_widget( 'WidgetLatestJob' );
+        register_widget( 'bekarcombdLatestJob' );
 
     }
 

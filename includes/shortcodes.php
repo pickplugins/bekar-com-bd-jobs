@@ -1,49 +1,5 @@
 <?php
-
-
-
 if ( ! defined('ABSPATH')) exit;  // if direct access 
-
-
-add_shortcode( 'bekarcombd_jobs', 'bekarcombd_jobs_display' );
-
- function bekarcombd_jobs_display($atts, $content = null ) {
-
-    $atts = shortcode_atts(
-        array(
-            'api_url' => 'https://bekar.com.bd/job-search-api/?per_page=10',
-
-            ),
-        $atts);
-
-    $api_url = isset($atts['api_url']) ? $atts['api_url'] : '';
-
-    $response = file_get_contents($api_url);
-    $response_data =  json_decode($response);
-
-    $jobs = $response_data->jobs;
-
-    ?>
-     <ul>
-         <?php
-         foreach ($jobs as $job){
-             $title = $job->title;
-             $url = $job->url;
-             $publish_date = $job->publish_date;
-
-             ?>
-             <li class="bekar-job">
-                 <a href="<?php echo $url; ?>"><?php echo $title; ?></a>
-             </li>
-             <?php
-         }
-         ?>
-     </ul>
-    <?php
- }
-
-
-
 
 
 add_shortcode( 'bekarcombd_jobs_search', 'bekarcombd_jobs_search_display' );
@@ -66,6 +22,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
         $bekar_location = isset($_GET['bekar_location']) ? sanitize_text_field($_GET['bekar_location']) : '';
 
         $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10&keywords='.urlencode($bekar_keyword);
+
     }else{
         $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10';
     }
@@ -73,8 +30,9 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
 
 
-    $response = file_get_contents($api_url);
-    $response_data =  json_decode($response);
+    $response = wp_remote_get( $api_url );
+    $body = wp_remote_retrieve_body( $response );
+    $response_data =  json_decode($body);
 
     $jobs = $response_data->jobs;
 

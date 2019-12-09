@@ -7,12 +7,12 @@
 if ( ! defined('ABSPATH')) exit;  // if direct access 
 	
 
-class WidgetLatestJob extends WP_Widget {
+class bekarcombdLatestJob extends WP_Widget {
 
 	function __construct() {
 		
 		parent::__construct(
-			'job_bm_widget_latest_job', 
+			'bekarcombd_latest_job',
 			__('bekar.com.bd - Latest Job', 'job-board-manager-widgets'),
 			array( 'description' => __( 'Show latest jobs.', 'job-board-manager-widgets' ), )
 		);
@@ -28,10 +28,13 @@ class WidgetLatestJob extends WP_Widget {
 		echo $args['before_widget'];
 		if ( ! empty( $title ) ) echo $args['before_title'] . $title . $args['after_title'];
 
-        $response = file_get_contents($api_url);
-        $response_data =  json_decode($response);
+        $response = wp_remote_get( $api_url );
+        $body = wp_remote_retrieve_body( $response );
+        $response_data =  json_decode($body);
 
         $jobs = $response_data->jobs;
+
+
 
         ?>
         <ul class="bekar-latest-jobs">
@@ -98,9 +101,3 @@ class WidgetLatestJob extends WP_Widget {
 		return $instance;
 	}
 }
-
-
-
-
-
-
