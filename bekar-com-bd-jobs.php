@@ -3,7 +3,7 @@
 Plugin Name: bekar.com.bd Jobs
 Plugin URI: https://bekar.com.bd/
 Description: Display jobs from bekar.com.bd for bangladeshi local job news.
-Version: 1.0.0
+Version: 1.0.1
 Author: pickplugins
 Author URI: http://pickplugins.com
 License: GPLv2 or later
@@ -20,7 +20,7 @@ class bekarcombdJobs{
         define('bekar_jobs_plugin_url', WP_PLUGIN_URL . '/' . plugin_basename( dirname(__FILE__) ) . '/' );
         define('bekar_jobs_plugin_dir', plugin_dir_path( __FILE__ ) );
         define('bekar_jobs_plugin_name', 'bekar.com.bd Jobs'  );
-        define('bekar_jobs_plugin_version', '1.0.0' );
+        define('bekar_jobs_plugin_version', '1.0.1' );
 
         // Class
 

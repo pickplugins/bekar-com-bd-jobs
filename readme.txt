@@ -4,7 +4,7 @@
 	Tags:  jobs display from bekar.com.bd
 	Requires at least: 4.1
 	Tested up to: 5.3
-	Stable tag: 1.0.0
+	Stable tag: 1.0.1
 	License: GPLv2 or later
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,12 @@ How to customize?
 
 
 == Changelog ==
+
+
+
+	= 1.0.1 =
+    * 10/12/2019 - fix - pagination issue.
+    * 10/12/2019 - add - Added API key.
 
 
 	= 1.0.0 =

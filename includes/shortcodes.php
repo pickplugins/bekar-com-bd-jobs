@@ -8,53 +8,71 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
     $atts = shortcode_atts(
         array(
-            'api_url' => 'https://bekar.com.bd/job-search-api/?per_page=5',
+            'api_url' => 'https://bekar.com.bd/job-search-api/',
+            'api_key' => '',
+
 
         ),
         $atts);
 
+    $api_key = isset($atts['api_key']) ? sanitize_text_field($atts['api_key']) : '';
+    $api_url = isset($atts['api_url']) ? esc_url_raw($atts['api_url']) : 'https://bekar.com.bd/job-search-api/';
+
     $bekar_keyword = '';
     $bekar_location = '';
+
     if ( get_query_var('paged') ) {$paged = get_query_var('paged');}
     elseif ( get_query_var('page') ) {$paged = get_query_var('page');}
     else {$paged = 1;}
 
     $per_page = isset($_GET['per_page']) ? sanitize_text_field($_GET['per_page']) : 10;
 
-    //echo '<pre>'.var_export($paged, true).'</pre>';
+    //echo '<pre>'.var_export($api_url, true).'</pre>';
 
 
-    if(! isset( $_POST['bekarcombd_nonce'] ) || ! wp_verify_nonce( $_POST['bekarcombd_nonce'], 'bekarcombd_nonce' ) ){
+    if(isset( $_GET['bekarcombd_nonce'] ) && wp_verify_nonce( $_GET['bekarcombd_nonce'], 'bekarcombd_nonce' ) ){
 
         $bekar_keyword = isset($_GET['bekar_keyword']) ? sanitize_text_field($_GET['bekar_keyword']) : '';
         $bekar_location = isset($_GET['bekar_location']) ? sanitize_text_field($_GET['bekar_location']) : '';
 
-        $api_url = 'https://bekar.com.bd/job-search-api/?per_page='.$per_page.'&paged='.$paged.'&keywords='.urlencode($bekar_keyword);
+        $api_url = $api_url.'?api_key='.$api_key.'&per_page='.$per_page.'&paged='.$paged.'&keywords='.urlencode($bekar_keyword);
 
     }else{
-        $api_url = 'https://bekar.com.bd/job-search-api/?per_page=10';
+        $api_url = $api_url.'?per_page=10&paged='.$paged.'&api_key='.$api_key.'';
     }
 
 
-
+    //echo '<pre>'.var_export($api_url, true).'</pre>';
 
     $response = wp_remote_get( $api_url );
     $body = wp_remote_retrieve_body( $response );
     $response_data =  json_decode($body);
 
+    $error = isset($response_data->error) ? $response_data->error : false;
+    $error_type = isset($response_data->error_type) ? $response_data->error_type : '';
+    $error_message = isset($response_data->error_message) ? $response_data->error_message : '';
+    $get_api_url = isset($response_data->get_api_url) ? $response_data->get_api_url : '';
+
+
+
     $jobs = isset($response_data->jobs) ? $response_data->jobs : array();
     $found_posts = isset($response_data->found_posts) ? $response_data->found_posts : '';
 
-    //echo '<pre>'.var_export($_SERVER, true).'</pre>';
+    //echo '<pre>'.var_export($found_posts, true).'</pre>';
 
 
     ob_start();
-
-
-
     ?>
 
     <div class="bekarcombd-jobs">
+
+    <?php if($error): ?>
+        <div class="error">
+            <p class="error-message"><?php echo $error_message; ?></p>
+        </div>
+    <?php endif; ?>
+
+
 
         <form method="get" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
             <input placeholder="Keyword" type="search" value="<?php echo $bekar_keyword; ?>" name="bekar_keyword">
@@ -69,12 +87,13 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
             if(!empty($jobs)):
             foreach ($jobs as $job){
-                $title = $job->title;
-                $url = $job->url;
-                $publish_date = $job->publish_date;
-                $expire_date = $job->expire_date;
-                $company_name = $job->company_name;
-                $import_source = $job->import_source;
+
+                $title = isset($job->title) ? $job->title : '';
+                $url = isset($job->url) ? $job->url : '';
+                $publish_date = isset($job->publish_date) ? $job->publish_date : '';
+                $expire_date = isset($job->expire_date) ? $job->expire_date : '';
+                $company_name = isset($job->company_name) ? $job->company_name : '';
+                $import_source = isset($job->import_source) ? $job->import_source : '';
 
 
                 $publish_date = strtotime($publish_date);
@@ -84,7 +103,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
                 ?>
                 <li class="job">
-                    <div class="job-title"><a href="<?php echo $url; ?>"><?php echo $title; ?></a></div>
+                    <div class="job-title"><a href="<?php echo $url.'?pkey='.$api_key; ?>"><?php echo $title; ?></a></div>
                     <div class="job-meta">
                         <?php if(!empty($publish_date)): ?>
                             <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo esc_html( human_time_diff( $publish_date, current_time('timestamp') ) ) . ' ago'; ?></span></div>
@@ -123,13 +142,25 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
         <div class="pagination">
             <?php
 
-            $big = $found_posts; // need an unlikely integer
-            echo paginate_links( array(
+            $big = 999999999;
+            $total = $found_posts;
+            $num_of_pages = ceil( $found_posts / $per_page );
+            $page_links = paginate_links( array(
+                //'base' => add_query_arg( 'pagenum', '%#%' ),
                 'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
                 'format' => '?paged=%#%',
-                'current' => max( 1, $paged ),
-                'total' => $per_page
+                'prev_text' => __( '&laquo;', 'aag' ),
+                'next_text' => __( '&raquo;', 'aag' ),
+                'total' => $num_of_pages,
+                'current' => $paged
             ) );
+
+            echo $page_links;
+
+
+
+
+
 
             ?>
         </div>
@@ -190,7 +221,9 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
             background: #b5b5b5;
         }
 
-
+        .bekarcombd-jobs .error-message{
+            color: #f00;
+        }
 
     </style>
 
