@@ -84,19 +84,19 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
                     <div class="job-title"><a href="<?php echo $url; ?>"><?php echo $title; ?></a></div>
                     <div class="job-meta">
                         <?php if(!empty($publish_date)): ?>
-                        <span>Published: <?php echo esc_html( human_time_diff( $publish_date, current_time('timestamp') ) ) . ' ago'; ?></span>
+                            <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo esc_html( human_time_diff( $publish_date, current_time('timestamp') ) ) . ' ago'; ?></span></div>
                         <?php endif; ?>
 
                         <?php if(!empty($expire_date)): ?>
-                        <span>Expire date: <?php echo $expire_date; ?></span>
+                            <div class="meta-item"><span class="meta-title">Expire date:</span> <span class="meta-value"><?php echo $expire_date; ?></span></div>
                         <?php endif; ?>
 
                         <?php if(!empty($company_name)): ?>
-                        <span>Company: <?php echo $company_name; ?></span>
+                            <div class="meta-item"><span class="meta-title">Company:</span> <span class="meta-value"><?php echo $company_name; ?></span></div>
                         <?php endif; ?>
 
                         <?php if(!empty($import_source)): ?>
-                            <span>Source: <?php echo $import_source; ?></span>
+                        <div class="meta-item"><span class="meta-title">Source:</span> <span class="meta-value"><?php echo $import_source; ?></span></div>
                         <?php endif; ?>
 
                     </div>
@@ -163,12 +163,19 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
         }
 
-        .bekarcombd-jobs .job-meta span{
+        .bekarcombd-jobs .job-meta .meta-item{
             font-size: 12px;
             display: inline-block;
             margin: 0 10px 0 0;
             padding: 0 10px 0 0;
         }
+        .bekarcombd-jobs .job-meta .meta-title{
+
+        }
+        .bekarcombd-jobs .job-meta .meta-value{
+            font-weight: bold;
+        }
+
 
         .bekarcombd-jobs .pagination{}
         .bekarcombd-jobs .pagination .page-numbers{
