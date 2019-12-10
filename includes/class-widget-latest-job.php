@@ -13,17 +13,26 @@ class bekarcombdLatestJob extends WP_Widget {
 		
 		parent::__construct(
 			'bekarcombd_latest_job',
-			__('bekar.com.bd - Latest Job', 'job-board-manager-widgets'),
-			array( 'description' => __( 'Show latest jobs.', 'job-board-manager-widgets' ), )
+			__('bekar.com.bd - Latest Job', 'bekar-com-bd-jobs-widgets'),
+			array( 'description' => __( 'Show latest jobs.', 'bekar-com-bd-jobs-widgets' ), )
 		);
 	}
 
 	public function widget( $args, $instance ) {
-		$title = apply_filters( 'widget_title', isset($instance['title']) ? $instance['title'] : '' );
-		$count = isset($instance['count']) ? $instance['count'] : 5;
-        $api_key = isset($instance['api_key']) ? $instance['api_key'] : '';
+        $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
 
-        $api_url = 'https://bekar.com.bd/job-search-api/?api_key='.$api_key.'&per_page='.$count;
+
+        $title = apply_filters( 'widget_title', isset($instance['title']) ? $instance['title'] : '' );
+		$count = isset($instance['count']) ? $instance['count'] : 5;
+
+        $api_key = isset($instance['api_key']) ? $instance['api_key'] : '';
+        $api_key = !empty($api_key) ?  $api_key : $bekar_jobs_api_key;
+
+
+        $api_url = bekar_jobs_api_url;
+
+
+        $api_url = $api_url.'?api_key='.$api_key.'&per_page='.$count;
 
 		echo $args['before_widget'];
 		if ( ! empty( $title ) ) echo $args['before_title'] . $title . $args['after_title'];
@@ -32,7 +41,7 @@ class bekarcombdLatestJob extends WP_Widget {
         $body = wp_remote_retrieve_body( $response );
         $response_data =  json_decode($body);
 
-        $jobs = $response_data->jobs;
+        $jobs = isset($response_data->jobs) ? $response_data->jobs : array();
 
 
 
@@ -46,7 +55,7 @@ class bekarcombdLatestJob extends WP_Widget {
 
                 ?>
                 <li class="bekar-job">
-                    <a href="<?php echo $url; ?>"><?php echo $title; ?></a>
+                    <a href="<?php echo $url; ?>?pkey=<?php echo $api_key; ?>"><?php echo $title; ?></a>
                 </li>
                 <?php
             }
@@ -59,7 +68,7 @@ class bekarcombdLatestJob extends WP_Widget {
 	
 	public function form( $instance ) {
 
-        $title = isset($instance['title']) ? $instance['title'] : __( 'Latest Job', 'job-board-manager-widgets' );
+        $title = isset($instance['title']) ? $instance['title'] : __( 'Latest Job', 'bekar-com-bd-jobs-widgets' );
 
         $api_key = isset($instance['api_key']) ? $instance['api_key'] : '';
         $count = isset($instance['count']) ? $instance['count'] : 5;
@@ -75,12 +84,12 @@ class bekarcombdLatestJob extends WP_Widget {
 
 		?>
 		<p>
-		<label for="<?php echo $this->get_field_id( 'count' ); ?>"><?php _e( 'Job count:', 'job-board-manager-widgets' ); ?></label>
+		<label for="<?php echo $this->get_field_id( 'count' ); ?>"><?php _e( 'Job count:', 'bekar-com-bd-jobs-widgets' ); ?></label>
 		<input class="widefat" id="<?php echo $this->get_field_id( 'count' ); ?>" name="<?php echo $this->get_field_name( 'count' ); ?>" type="text" value="<?php echo esc_attr( $count ); ?>" />
 		</p>
 
         <p>
-            <label for="<?php echo $this->get_field_id( 'api_key' ); ?>"><?php _e( 'API key:', 'job-board-manager-widgets' ); ?></label>
+            <label for="<?php echo $this->get_field_id( 'api_key' ); ?>"><?php _e( 'API key:', 'bekar-com-bd-jobs-widgets' ); ?></label>
             <input class="widefat" id="<?php echo $this->get_field_id( 'api_key' ); ?>" name="<?php echo $this->get_field_name( 'api_key' ); ?>" type="text" value="<?php echo esc_attr( $api_key ); ?>" />
             <div>Get your API key from here <a href="https://bekar.com.bd/job-dashboard/">https://bekar.com.bd/job-dashboard/</a> </div>
         </p>

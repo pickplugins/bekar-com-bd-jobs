@@ -8,15 +8,20 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
     $atts = shortcode_atts(
         array(
-            'api_url' => 'https://bekar.com.bd/job-search-api/',
             'api_key' => '',
 
 
         ),
         $atts);
 
+    $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
+
+
     $api_key = isset($atts['api_key']) ? sanitize_text_field($atts['api_key']) : '';
-    $api_url = isset($atts['api_url']) ? esc_url_raw($atts['api_url']) : 'https://bekar.com.bd/job-search-api/';
+    $api_key = !empty($api_key) ?  $api_key : $bekar_jobs_api_key;
+
+
+    $api_url = bekar_jobs_api_url;
 
     $bekar_keyword = '';
     $bekar_location = '';
@@ -56,7 +61,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
 
     $jobs = isset($response_data->jobs) ? $response_data->jobs : array();
-    $found_posts = isset($response_data->found_posts) ? $response_data->found_posts : '';
+    $found_posts = isset($response_data->found_posts) ? $response_data->found_posts : 0;
 
     //echo '<pre>'.var_export($found_posts, true).'</pre>';
 
@@ -96,9 +101,9 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
                 $import_source = isset($job->import_source) ? $job->import_source : '';
 
 
-                $publish_date = strtotime($publish_date);
+                //$publish_date = strtotime($publish_date);
 
-                //echo '<pre>'.var_export($response_data, true).'</pre>';
+                //echo '<pre>'.var_export($publish_date, true).'</pre>';
 
 
                 ?>
@@ -106,7 +111,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
                     <div class="job-title"><a href="<?php echo $url.'?pkey='.$api_key; ?>"><?php echo $title; ?></a></div>
                     <div class="job-meta">
                         <?php if(!empty($publish_date)): ?>
-                            <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo esc_html( human_time_diff( $publish_date, current_time('timestamp') ) ) . ' ago'; ?></span></div>
+                            <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo $publish_date; ?></span></div>
                         <?php endif; ?>
 
                         <?php if(!empty($expire_date)): ?>
@@ -139,8 +144,12 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
             ?>
         </ul>
 
+
+    <?php if(!empty($found_posts)): ?>
         <div class="pagination">
             <?php
+
+
 
             $big = 999999999;
             $total = $found_posts;
@@ -164,7 +173,7 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
             ?>
         </div>
-
+    <?php endif; ?>
 
     </div>
 

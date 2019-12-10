@@ -47,6 +47,11 @@ How to customize?
 
 
 
+	= 1.0.2 =
+    * 10/12/2019 - add - settings page adde
+    * 10/12/2019 - add - help page adde
+
+
 	= 1.0.1 =
     * 10/12/2019 - fix - pagination issue.
     * 10/12/2019 - add - Added API key.
