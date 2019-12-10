@@ -48,6 +48,9 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
     //echo '<pre>'.var_export($_SERVER, true).'</pre>';
 
 
+    ob_start();
+
+
 
     ?>
 
@@ -193,6 +196,9 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
 
     <?php
+
+    return ob_get_clean();
+
 }
 
 
