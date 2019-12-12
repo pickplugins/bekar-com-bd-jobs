@@ -22,6 +22,7 @@ class bekarcombdJobs{
         define('bekar_jobs_plugin_name', 'bekar.com.bd Jobs'  );
         define('bekar_jobs_plugin_version', '1.0.2' );
         define('bekar_jobs_api_url', 'https://bekar.com.bd/job-search-api/' );
+        define('bekar_job_post_api_url', 'http://localhost/wp-multi/job-board-manager/job-post-api/' );
 
 
 
@@ -33,6 +34,7 @@ class bekarcombdJobs{
         require_once( bekar_jobs_plugin_dir . 'includes/class-widget-latest-job.php');
 
         require_once( bekar_jobs_plugin_dir . 'includes/functions-settings.php');
+        require_once( bekar_jobs_plugin_dir . 'includes/functions-publish-job.php');
 
 
 

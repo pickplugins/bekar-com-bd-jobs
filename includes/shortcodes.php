@@ -9,8 +9,6 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
     $atts = shortcode_atts(
         array(
             'api_key' => '',
-
-
         ),
         $atts);
 
@@ -242,6 +240,179 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
     return ob_get_clean();
 
 }
+
+
+
+add_shortcode( 'bekarcombd_job_post', 'bekarcombd_job_post_display' );
+
+function bekarcombd_job_post_display($atts, $content = null ){
+
+    $atts = shortcode_atts(
+        array(
+            'api_key' => '',
+        ),
+        $atts);
+
+    $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
+    $api_key = $bekar_jobs_api_key;
+
+    $api_params = array();
+
+    $api_params['api_key'] = $api_key;
+
+    $meta_query[] = array(
+        'key' => 'server_job_id',
+        'compare' => 'NOT EXISTS',
+    );
+
+
+
+    $query_args = array (
+        'post_type' => 'job',
+        'post_status' => 'publish',
+        'orderby' => 'date',
+        'order' => 'DESC',
+        'meta_query' => $meta_query,
+        'posts_per_page' => 1,
+    );
+
+    $wp_query = new WP_Query($query_args);
+    if ( $wp_query->have_posts() ) :
+        $count = 1;
+
+        while( $wp_query->have_posts() ) : $wp_query->the_post();
+
+            $client_job_id = get_the_ID();
+
+            $api_params['client_job_id'] =  $client_job_id;
+            $api_params['post_title'] = get_the_title();
+            $api_params['post_content'] = get_the_content();
+            $api_params['job_category'] = '';
+
+            $api_params['job_bm_total_vacancies'] = get_post_meta($client_job_id, 'job_bm_total_vacancies', true);
+            $api_params['job_bm_job_type'] =  get_post_meta($client_job_id, 'job_bm_job_type', true);
+            $api_params['job_bm_job_level'] =  get_post_meta($client_job_id, 'job_bm_job_level', true);
+            $api_params['job_bm_years_experience'] =  get_post_meta($client_job_id, 'job_bm_years_experience', true);
+            $api_params['job_bm_salary_type'] =  get_post_meta($client_job_id, 'job_bm_salary_type', true);
+            $api_params['job_bm_salary_fixed'] =  get_post_meta($client_job_id, 'job_bm_salary_fixed', true);
+            $api_params['job_bm_salary_min'] =  get_post_meta($client_job_id, 'job_bm_salary_min', true);
+            $api_params['job_bm_salary_max'] =  get_post_meta($client_job_id, 'job_bm_salary_max', true);
+            $api_params['job_bm_salary_duration'] =  get_post_meta($client_job_id, 'job_bm_salary_duration', true);
+            $api_params['job_bm_salary_currency'] =  get_post_meta($client_job_id, 'job_bm_total_vacancies', true);
+            $api_params['job_bm_contact_email'] =  get_post_meta($client_job_id, 'job_bm_contact_email', true);
+            $api_params['job_bm_company_name'] =  get_post_meta($client_job_id, 'job_bm_company_name', true);
+            $api_params['job_bm_location'] =  get_post_meta($client_job_id, 'job_bm_location', true);
+            $api_params['job_bm_address'] =  get_post_meta($client_job_id, 'job_bm_address', true);
+            $api_params['job_bm_company_website'] =  get_post_meta($client_job_id, 'job_bm_company_website', true);
+            $api_params['job_bm_company_logo'] =  get_post_meta($client_job_id, 'job_bm_company_logo', true);
+
+
+            $response = wp_remote_get(add_query_arg($api_params, bekar_job_post_api_url), array('timeout' => 20, 'sslverify' => false));
+
+            //$response = wp_remote_get( $api_url );
+            $body = wp_remote_retrieve_body( $response );
+            $response_data =  json_decode($body);
+
+            $server_job_id = isset($response_data->server_job_id) ? $response_data->server_job_id : 'no jo created';
+            $server_error = isset($response_data->error) ? $response_data->error : '';
+
+
+
+            if(!$server_error && !empty($server_job_id)){
+
+                echo '<pre>'.var_export(get_the_title(), true).'</pre>';
+                echo '<pre>'.var_export($server_job_id, true).'</pre>';
+
+                update_post_meta($client_job_id, 'server_job_id', $server_job_id);
+            }else{
+                echo '<pre>'.var_export('There is an error', true).'</pre>';
+            }
+
+
+
+        endwhile;
+
+        wp_reset_query();
+    else:
+
+
+    endif;
+
+
+
+}
+
+
+
+
+
+
+function bekarcombd_sync_job_by_id($job_id ){
+
+    $return = array();
+    $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
+    $api_key = $bekar_jobs_api_key;
+
+    $api_params = array();
+
+    $api_params['api_key'] = $api_key;
+
+    $client_job_id = $job_id;
+
+    $api_params['client_job_id'] =  $client_job_id;
+    $api_params['post_title'] = get_the_title($client_job_id);
+    $api_params['post_content'] = get_the_content($client_job_id);
+    //$api_params['job_category'] = '';
+
+    $api_params['job_bm_total_vacancies'] = get_post_meta($client_job_id, 'job_bm_total_vacancies', true);
+    $api_params['job_bm_job_type'] =  get_post_meta($client_job_id, 'job_bm_job_type', true);
+    $api_params['job_bm_job_level'] =  get_post_meta($client_job_id, 'job_bm_job_level', true);
+    $api_params['job_bm_years_experience'] =  get_post_meta($client_job_id, 'job_bm_years_experience', true);
+    $api_params['job_bm_salary_type'] =  get_post_meta($client_job_id, 'job_bm_salary_type', true);
+    $api_params['job_bm_salary_fixed'] =  get_post_meta($client_job_id, 'job_bm_salary_fixed', true);
+    $api_params['job_bm_salary_min'] =  get_post_meta($client_job_id, 'job_bm_salary_min', true);
+    $api_params['job_bm_salary_max'] =  get_post_meta($client_job_id, 'job_bm_salary_max', true);
+    $api_params['job_bm_salary_duration'] =  get_post_meta($client_job_id, 'job_bm_salary_duration', true);
+    $api_params['job_bm_salary_currency'] =  get_post_meta($client_job_id, 'job_bm_total_vacancies', true);
+    $api_params['job_bm_contact_email'] =  get_post_meta($client_job_id, 'job_bm_contact_email', true);
+    $api_params['job_bm_company_name'] =  get_post_meta($client_job_id, 'job_bm_company_name', true);
+    $api_params['job_bm_location'] =  get_post_meta($client_job_id, 'job_bm_location', true);
+    $api_params['job_bm_address'] =  get_post_meta($client_job_id, 'job_bm_address', true);
+    $api_params['job_bm_company_website'] =  get_post_meta($client_job_id, 'job_bm_company_website', true);
+    $api_params['job_bm_company_logo'] =  get_post_meta($client_job_id, 'job_bm_company_logo', true);
+
+
+    $response = wp_remote_get(add_query_arg($api_params, bekar_job_post_api_url), array('timeout' => 20, 'sslverify' => false));
+    $body = wp_remote_retrieve_body( $response );
+    $response_data =  json_decode($body);
+
+    $server_job_id = isset($response_data->server_job_id) ? $response_data->server_job_id : '';
+    $server_job_url = isset($response_data->server_job_url) ? $response_data->server_job_url : '';
+
+    $server_error = isset($response_data->error) ? $response_data->error : '';
+
+    if(!$server_error && !empty($server_job_id)){
+
+        update_post_meta($client_job_id, 'server_job_id', $server_job_id);
+        update_post_meta($client_job_id, 'server_job_url', $server_job_url);
+
+
+        $return['status'] = 'sync_done';
+    }else{
+
+        $return['status'] = 'sync_error';
+    }
+
+
+
+    return $return;
+
+
+}
+
+
+
+
 
 
 
