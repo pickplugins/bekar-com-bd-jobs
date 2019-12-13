@@ -12,7 +12,6 @@ if(!function_exists('bekar_jobs_tabs_content_general')) {
         $settings_tabs_field = new settings_tabs_field();
 
         $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
-        $bekar_jobs_enable_sync = get_option('bekar_jobs_enable_sync');
 
 
         ?>
@@ -34,22 +33,6 @@ if(!function_exists('bekar_jobs_tabs_content_general')) {
             );
 
             $settings_tabs_field->generate_field($args);
-
-
-            $args = array(
-                'id'		=> 'bekar_jobs_enable_sync',
-                //'parent'		=> '',
-                'title'		=> __('Enable job sync','bekar-com-bd-jobs'),
-                'details'	=> __('Enable job sync to bekar.com.bd, this will automatically send jobs to bekar.com.bd and publish.','bekar-com-bd-jobs'),
-                'type'		=> 'select',
-                'value'		=> $bekar_jobs_enable_sync,
-                'default'		=> 'yes',
-                'args'		=> array('yes'=>'Yes', 'no'=>'No'),
-            );
-
-            $settings_tabs_field->generate_field($args);
-
-
 
 
             ?>
@@ -156,8 +139,6 @@ if(!function_exists('bekar_jobs_settings_save')) {
         $bekar_jobs_api_key = isset($_POST['bekar_jobs_api_key']) ?  sanitize_text_field($_POST['bekar_jobs_api_key']) : '';
         update_option('bekar_jobs_api_key', $bekar_jobs_api_key);
 
-        $bekar_jobs_enable_sync = isset($_POST['bekar_jobs_enable_sync']) ?  sanitize_text_field($_POST['bekar_jobs_enable_sync']) : '';
-        update_option('bekar_jobs_enable_sync', $bekar_jobs_enable_sync);
 
 
     }

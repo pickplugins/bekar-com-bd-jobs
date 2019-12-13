@@ -38,30 +38,36 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
         $bekar_keyword = isset($_GET['bekar_keyword']) ? sanitize_text_field($_GET['bekar_keyword']) : '';
         $bekar_location = isset($_GET['bekar_location']) ? sanitize_text_field($_GET['bekar_location']) : '';
 
-        $api_url = $api_url.'?api_key='.$api_key.'&per_page='.$per_page.'&paged='.$paged.'&keywords='.urlencode($bekar_keyword);
+        $api_params['action'] = 'job_search';
+
+        $api_params['per_page'] = $per_page;
+        $api_params['page_number'] = $paged;
+        $api_params['api_key'] = $api_key;
+        $api_params['keywords'] = urlencode($bekar_keyword);
+        $api_params['locations'] = urlencode($bekar_location);
+
+
 
     }else{
-        $api_url = $api_url.'?per_page=10&paged='.$paged.'&api_key='.$api_key.'';
+        $api_params['action'] = 'job_search';
+        $api_params['per_page'] = 10;
+        $api_params['page_number'] = 1;
+        $api_params['api_key'] =$api_key;
+
+
     }
 
+    $response = wp_remote_get(add_query_arg($api_params, bekar_jobs_api_url), array('timeout' => 20, 'sslverify' => false));
 
-    //echo '<pre>'.var_export($api_url, true).'</pre>';
-
-    $response = wp_remote_get( $api_url );
+    //$response = wp_remote_get( $api_url );
     $body = wp_remote_retrieve_body( $response );
     $response_data =  json_decode($body);
 
-    $error = isset($response_data->error) ? $response_data->error : false;
-    $error_type = isset($response_data->error_type) ? $response_data->error_type : '';
-    $error_message = isset($response_data->error_message) ? $response_data->error_message : '';
-    $get_api_url = isset($response_data->get_api_url) ? $response_data->get_api_url : '';
-
-
-
+    $error_messages = isset($response_data->error_messages) ? $response_data->error_messages : array();
     $jobs = isset($response_data->jobs) ? $response_data->jobs : array();
     $found_posts = isset($response_data->found_posts) ? $response_data->found_posts : 0;
 
-    //echo '<pre>'.var_export($found_posts, true).'</pre>';
+    //echo '<pre>'.var_export($error_messages, true).'</pre>';
 
 
     ob_start();
@@ -69,109 +75,126 @@ function bekarcombd_jobs_search_display($atts, $content = null ) {
 
     <div class="bekarcombd-jobs">
 
-    <?php if($error): ?>
+    <?php if(!empty($error_messages)): ?>
         <div class="error">
-            <p class="error-message"><?php echo $error_message; ?></p>
-        </div>
-    <?php endif; ?>
-
-
-
-        <form method="get" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
-            <input placeholder="Keyword" type="search" value="<?php echo $bekar_keyword; ?>" name="bekar_keyword">
-            <input placeholder="Location" type="search" value="<?php echo $bekar_location; ?>" name="bekar_location">
-
-            <?php wp_nonce_field( 'bekarcombd_nonce','bekarcombd_nonce' ); ?>
-            <input type="submit" value="Submit">
-        </form>
-
-        <ul class="job-list">
             <?php
 
-            if(!empty($jobs)):
-            foreach ($jobs as $job){
-
-                $title = isset($job->title) ? $job->title : '';
-                $url = isset($job->url) ? $job->url : '';
-                $publish_date = isset($job->publish_date) ? $job->publish_date : '';
-                $expire_date = isset($job->expire_date) ? $job->expire_date : '';
-                $company_name = isset($job->company_name) ? $job->company_name : '';
-                $import_source = isset($job->import_source) ? $job->import_source : '';
-
-
-                //$publish_date = strtotime($publish_date);
-
-                //echo '<pre>'.var_export($publish_date, true).'</pre>';
-
-
+            foreach ($error_messages as $message){
                 ?>
-                <li class="job">
-                    <div class="job-title"><a href="<?php echo $url.'?pkey='.$api_key; ?>"><?php echo $title; ?></a></div>
-                    <div class="job-meta">
-                        <?php if(!empty($publish_date)): ?>
-                            <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo $publish_date; ?></span></div>
-                        <?php endif; ?>
-
-                        <?php if(!empty($expire_date)): ?>
-                            <div class="meta-item"><span class="meta-title">Expire date:</span> <span class="meta-value"><?php echo $expire_date; ?></span></div>
-                        <?php endif; ?>
-
-                        <?php if(!empty($company_name)): ?>
-                            <div class="meta-item"><span class="meta-title">Company:</span> <span class="meta-value"><?php echo $company_name; ?></span></div>
-                        <?php endif; ?>
-
-                        <?php if(!empty($import_source)): ?>
-                        <div class="meta-item"><span class="meta-title">Source:</span> <span class="meta-value"><?php echo $import_source; ?></span></div>
-                        <?php endif; ?>
-
-                    </div>
-                </li>
+                <div class="error-message"><?php echo $message;?></div>
                 <?php
+
             }
-            else:
-                ?>
-            <li class="job">
-                <div class="job-title">Sorry! there is a server error, please try again.</div>
-            </li>
-                <?php
-            endif;
-
-
-
-
-            ?>
-        </ul>
-
-
-    <?php if(!empty($found_posts)): ?>
-        <div class="pagination">
-            <?php
-
-
-
-            $big = 999999999;
-            $total = $found_posts;
-            $num_of_pages = ceil( $found_posts / $per_page );
-            $page_links = paginate_links( array(
-                //'base' => add_query_arg( 'pagenum', '%#%' ),
-                'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-                'format' => '?paged=%#%',
-                'prev_text' => __( '&laquo;', 'aag' ),
-                'next_text' => __( '&raquo;', 'aag' ),
-                'total' => $num_of_pages,
-                'current' => $paged
-            ) );
-
-            echo $page_links;
-
-
-
-
-
 
             ?>
         </div>
-    <?php endif; ?>
+    <?php
+
+        else:
+
+        ?>
+            <form method="get" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+                <input placeholder="Keyword" type="search" value="<?php echo $bekar_keyword; ?>" name="bekar_keyword">
+                <input placeholder="Location" type="search" value="<?php echo $bekar_location; ?>" name="bekar_location">
+
+                <?php wp_nonce_field( 'bekarcombd_nonce','bekarcombd_nonce' ); ?>
+                <input type="submit" value="Submit">
+            </form>
+
+            <ul class="job-list">
+                <?php
+
+                if(!empty($jobs)):
+                    foreach ($jobs as $job){
+
+                        $title = isset($job->title) ? $job->title : '';
+                        $url = isset($job->url) ? $job->url : '';
+                        $publish_date = isset($job->publish_date) ? $job->publish_date : '';
+                        $expire_date = isset($job->expire_date) ? $job->expire_date : '';
+                        $company_name = isset($job->company_name) ? $job->company_name : '';
+                        $import_source = isset($job->import_source) ? $job->import_source : '';
+
+
+                        //$publish_date = strtotime($publish_date);
+
+                        //echo '<pre>'.var_export($publish_date, true).'</pre>';
+
+
+                        ?>
+                        <li class="job">
+                            <div class="job-title"><a href="<?php echo $url.'?pkey='.$api_key; ?>"><?php echo $title; ?></a></div>
+                            <div class="job-meta">
+                                <?php if(!empty($publish_date)): ?>
+                                    <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo $publish_date; ?></span></div>
+                                <?php endif; ?>
+
+                                <?php if(!empty($expire_date)): ?>
+                                    <div class="meta-item"><span class="meta-title">Expire date:</span> <span class="meta-value"><?php echo $expire_date; ?></span></div>
+                                <?php endif; ?>
+
+                                <?php if(!empty($company_name)): ?>
+                                    <div class="meta-item"><span class="meta-title">Company:</span> <span class="meta-value"><?php echo $company_name; ?></span></div>
+                                <?php endif; ?>
+
+                                <?php if(!empty($import_source)): ?>
+                                    <div class="meta-item"><span class="meta-title">Source:</span> <span class="meta-value"><?php echo $import_source; ?></span></div>
+                                <?php endif; ?>
+
+                            </div>
+                        </li>
+                        <?php
+                    }
+                else:
+                    ?>
+                    <li class="job">
+                        <div class="job-title">Sorry! there is a server error, please try again.</div>
+                    </li>
+                <?php
+                endif;
+
+
+
+
+                ?>
+            </ul>
+
+
+            <?php if(!empty($found_posts)): ?>
+            <div class="pagination">
+                <?php
+
+
+
+                $big = 999999999;
+                $total = $found_posts;
+                $num_of_pages = ceil( $found_posts / $per_page );
+                $page_links = paginate_links( array(
+                    //'base' => add_query_arg( 'pagenum', '%#%' ),
+                    'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+                    'format' => '?paged=%#%',
+                    'prev_text' => __( '&laquo;', 'aag' ),
+                    'next_text' => __( '&raquo;', 'aag' ),
+                    'total' => $num_of_pages,
+                    'current' => $paged
+                ) );
+
+                echo $page_links;
+                ?>
+            </div>
+        <?php endif; ?>
+
+
+        <?php
+
+        endif; ?>
+
+
+
+
+
+
+
+
 
     </div>
 
@@ -307,7 +330,7 @@ function bekarcombd_job_post_display($atts, $content = null ){
             $api_params['job_bm_company_logo'] =  get_post_meta($client_job_id, 'job_bm_company_logo', true);
 
 
-            $response = wp_remote_get(add_query_arg($api_params, bekar_job_post_api_url), array('timeout' => 20, 'sslverify' => false));
+            $response = wp_remote_get(add_query_arg($api_params, bekar_jobs_api_url), array('timeout' => 20, 'sslverify' => false));
 
             //$response = wp_remote_get( $api_url );
             $body = wp_remote_retrieve_body( $response );
@@ -347,23 +370,23 @@ function bekarcombd_job_post_display($atts, $content = null ){
 
 
 
-function bekarcombd_sync_job_by_id($job_id ){
+function bekarcombd_sync_job_by_id($client_job_id ){
 
-    $return = array();
+    global $post;
+
+    $response = array();
     $bekar_jobs_api_key = get_option('bekar_jobs_api_key');
     $api_key = $bekar_jobs_api_key;
 
     $api_params = array();
 
     $api_params['api_key'] = $api_key;
+    $api_params['action'] = 'job_submit';
 
-    $client_job_id = $job_id;
 
     $api_params['client_job_id'] =  $client_job_id;
     $api_params['post_title'] = get_the_title($client_job_id);
-    $api_params['post_content'] = get_the_content($client_job_id);
-    //$api_params['job_category'] = '';
-
+    $api_params['post_content'] = $post->post_content;
     $api_params['job_bm_total_vacancies'] = get_post_meta($client_job_id, 'job_bm_total_vacancies', true);
     $api_params['job_bm_job_type'] =  get_post_meta($client_job_id, 'job_bm_job_type', true);
     $api_params['job_bm_job_level'] =  get_post_meta($client_job_id, 'job_bm_job_level', true);
@@ -382,30 +405,36 @@ function bekarcombd_sync_job_by_id($job_id ){
     $api_params['job_bm_company_logo'] =  get_post_meta($client_job_id, 'job_bm_company_logo', true);
 
 
-    $response = wp_remote_get(add_query_arg($api_params, bekar_job_post_api_url), array('timeout' => 20, 'sslverify' => false));
-    $body = wp_remote_retrieve_body( $response );
-    $response_data =  json_decode($body);
+    $server_response = wp_remote_get(add_query_arg($api_params, bekar_jobs_api_url), array('timeout' => 20, 'sslverify' => false));
+    $body = wp_remote_retrieve_body( $server_response );
+    $server_response_data =  json_decode($body);
 
-    $server_job_id = isset($response_data->server_job_id) ? $response_data->server_job_id : '';
-    $server_job_url = isset($response_data->server_job_url) ? $response_data->server_job_url : '';
+    $server_job_id = isset($server_response_data->server_job_id) ? $server_response_data->server_job_id : '';
+    $server_job_url = isset($server_response_data->server_job_url) ? $server_response_data->server_job_url : '';
 
-    $server_error = isset($response_data->error) ? $response_data->error : '';
+    $error_messages = isset($server_response_data->error_messages) ? $server_response_data->error_messages : '';
 
-    if(!$server_error && !empty($server_job_id)){
+    echo '<pre>'.var_export($server_response_data, true).'</pre>';
 
-        update_post_meta($client_job_id, 'server_job_id', $server_job_id);
-        update_post_meta($client_job_id, 'server_job_url', $server_job_url);
-
-
-        $return['status'] = 'sync_done';
+    if(!empty($error_messages)){
+        $response['error_messages'] = $error_messages;
+        $response['status'] = 'failed';
     }else{
+        if(!empty($server_job_id)){
 
-        $return['status'] = 'sync_error';
+            update_post_meta($client_job_id, 'server_job_id', $server_job_id);
+            update_post_meta($client_job_id, 'server_job_url', $server_job_url);
+
+            $response['status'] = 'success';
+
+        }
+
+
+
     }
 
 
-
-    return $return;
+    return $response;
 
 
 }
