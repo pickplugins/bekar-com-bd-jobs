@@ -1,4 +1,4 @@
-=== Bangladeshi Local  Jobs ===
+=== Bangladeshi Local Jobs ===
 	Contributors: pickplugins
 	Donate link: http://pickplugins.com
 	Tags:  job circular bangladesh, bd jobs, bd govt jobs, bd job today
@@ -15,7 +15,7 @@
 
 Display bangladeshi job circular on your website, you can display latest jobs via widgets and display any where via shortcode, there is search form at top of the job list, your site visitor can search jobs by keywords and locations, we used [bekar.com.bd](https://bekar.com.bd) as our server to query jobs to display on your site, there is API based query available, you can use custom parameter to filter jobs based on keywords, location, post per page and many more. we provide a details documentation for this. if you are a developer you can customize the output by styling your own.
 
-### bekar.com.bd Jobs by http://pickplugins.com
+### Bangladeshi Local Jobs by http://pickplugins.com
 
 #### Contribute on grithub
 

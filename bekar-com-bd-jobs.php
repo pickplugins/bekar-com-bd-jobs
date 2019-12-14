@@ -23,8 +23,6 @@ class bekarcombdJobs{
         define('bekar_jobs_plugin_version', '1.0.3' );
         define('bekar_jobs_api_url', 'https://bekar.com.bd/job-api/' );
 
-
-
         // Class
         require_once( bekar_jobs_plugin_dir . 'includes/class-settings.php');
         require_once( bekar_jobs_plugin_dir . 'includes/class-settings-tabs.php');
