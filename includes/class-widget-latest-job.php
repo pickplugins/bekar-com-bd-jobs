@@ -13,7 +13,7 @@ class bekarcombdLatestJob extends WP_Widget {
 		
 		parent::__construct(
 			'bekarcombd_latest_job',
-			__('bekar.com.bd - Latest Job', 'bekar-com-bd-jobs-widgets'),
+			__('BD Local Jobs', 'bekar-com-bd-jobs-widgets'),
 			array( 'description' => __( 'Show latest jobs.', 'bekar-com-bd-jobs-widgets' ), )
 		);
 	}
@@ -32,12 +32,16 @@ class bekarcombdLatestJob extends WP_Widget {
         $api_url = bekar_jobs_api_url;
 
 
-        $api_url = $api_url.'?api_key='.$api_key.'&per_page='.$count;
-
 		echo $args['before_widget'];
 		if ( ! empty( $title ) ) echo $args['before_title'] . $title . $args['after_title'];
 
-        $response = wp_remote_get( $api_url );
+        $api_params['api_key'] = $api_key;
+        $api_params['action'] = 'job_search';
+        $api_params['per_page'] = $count;
+
+
+        $response = wp_remote_get(add_query_arg($api_params, bekar_jobs_api_url), array('timeout' => 20, 'sslverify' => false));
+
         $body = wp_remote_retrieve_body( $response );
         $response_data =  json_decode($body);
 
@@ -52,15 +56,41 @@ class bekarcombdLatestJob extends WP_Widget {
                 $title = isset($job->title) ? $job->title : '';
                 $url = isset($job->url) ? $job->url : '';
                 $publish_date = isset($job->publish_date) ? $job->publish_date : '';
+                $import_source = isset($job->import_source) ? $job->import_source : '';
 
                 ?>
                 <li class="bekar-job">
                     <a href="<?php echo $url; ?>?pkey=<?php echo $api_key; ?>"><?php echo $title; ?></a>
+                    <div class="job-meta">
+
+                        <?php if(!empty($publish_date)): ?>
+                            <div class="meta-item"><span class="meta-title">Published:</span> <span class="meta-value"><?php echo $publish_date; ?></span></div>
+                        <?php endif; ?>
+
+                        <?php if(!empty($import_source)): ?>
+                            <div class="meta-item"><span class="meta-title">Source:</span> <span class="meta-value"><?php echo $import_source; ?></span></div>
+                        <?php endif; ?>
+
+                    </div>
+
                 </li>
                 <?php
             }
             ?>
         </ul>
+
+        <style type="text/css">
+            .bekar-latest-jobs{}
+            .bekar-latest-jobs a{}
+            .bekar-latest-jobs .job-meta{}
+            .bekar-latest-jobs .meta-item{
+                font-size: 12px;
+                display: inline-block;
+                margin: 0 15px 15px 0;
+            }
+
+
+        </style>
         <?php
 		
 		echo $args['after_widget'];

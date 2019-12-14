@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: bekar.com.bd Jobs
+Plugin Name: BD Local Jobs
 Plugin URI: https://bekar.com.bd/
 Description: Display jobs from bekar.com.bd for bangladeshi local job news.
-Version: 1.0.2
+Version: 1.0.3
 Author: pickplugins
 Author URI: http://pickplugins.com
 License: GPLv2 or later
@@ -16,12 +16,12 @@ if ( ! defined('ABSPATH')) exit;  // if direct access
 class bekarcombdJobs{
 	
 	public function __construct(){
-	
-        define('bekar_jobs_plugin_url', WP_PLUGIN_URL . '/' . plugin_basename( dirname(__FILE__) ) . '/' );
+
+        define('bekar_jobs_plugin_url', plugins_url('/', __FILE__)  );
         define('bekar_jobs_plugin_dir', plugin_dir_path( __FILE__ ) );
-        define('bekar_jobs_plugin_name', 'bekar.com.bd Jobs'  );
-        define('bekar_jobs_plugin_version', '1.0.2' );
-        define('bekar_jobs_api_url', 'http://localhost/wp-multi/job-board-manager/job-api/' );
+        define('bekar_jobs_plugin_name', 'BD Local Jobs'  );
+        define('bekar_jobs_plugin_version', '1.0.3' );
+        define('bekar_jobs_api_url', 'https://bekar.com.bd/job-api/' );
 
 
 
@@ -34,7 +34,6 @@ class bekarcombdJobs{
 
         require_once( bekar_jobs_plugin_dir . 'includes/functions-job-metabox.php');
         require_once( bekar_jobs_plugin_dir . 'includes/functions-settings.php');
-        require_once( bekar_jobs_plugin_dir . 'includes/functions-publish-job.php');
 
 
 

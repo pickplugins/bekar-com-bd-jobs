@@ -111,26 +111,6 @@ if(!function_exists('bekar_jobs_tabs_content_help')) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 add_action('bekar_jobs_settings_save', 'bekar_jobs_settings_save');
 
 if(!function_exists('bekar_jobs_settings_save')) {
